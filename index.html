@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Play M3U8 Video</title>
+    <link href="https://vjs.zencdn.net/7.14.3/video-js.css" rel="stylesheet" />
+    <script src="https://vjs.zencdn.net/7.14.3/video.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-hls/5.15.0/videojs-contrib-hls.min.js"></script>
+</head>
+
+<body>
+    <video id="videoPlayer" class="video-js vjs-default-skin" controls preload="auto" width="640" height="360"></video>
+    <script>
+        // The m3u8 link fetched from the API
+        const videoUrl = 'https://gamn.v4322a77e96.site/_v2-bkdx/12a3c523fb105800ed8c394685aeeb0b9a2eaa5c02e7e0ed4f1a7baea93ece832257df1a4b6125fcfa38c35da05dee86aad28d46d73fc4e9d4e5a57f0720afd533c712e3091fb40e14c2f0ab6b4622156b64cf3c57053195cdcaba0a9fa92c863b48e31c/h/list;15a38634f803584ba8926411d7bee906856cab0654b5bd.m3u8';
+
+        // Initialize the Video.js player
+        const player = videojs('videoPlayer');
+
+        // Set the source of the player to the m3u8 link
+        player.src({
+            src: videoUrl,
+            type: 'application/x-mpegURL'
+        });
+
+        // Play the video
+        player.play();
+    </script>
+</body>
+
+</html>
