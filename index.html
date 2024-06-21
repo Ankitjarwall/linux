@@ -6,50 +6,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        .overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            /* Full viewport height */
+            overflow: hidden;
+        }
+
+        iframe {
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0);
-            z-index: 1000;
-            pointer-events: none;
+            border: none;
         }
     </style>
 </head>
 
 <body>
-    <div class="iframe-container" style="position: relative; width: 100%; height: 100vh;">
-        <iframe id="contentFrame" src="https://vidsrc.in/embed/tv?imdb=tt27668559&season=1&episode=1"
-            style="width: 100%; height: 100%;" frameborder="0" referrerpolicy="origin" allowfullscreen></iframe>
-        <div class="overlay" id="idOverlay"></div>
+    <div class="iframe-container">
+        <iframe id="contentFrame" src="https://vidsrc.in/embed/tv?imdb=tt27668559&season=1&episode=1"></iframe>
     </div>
 
     <script>
-        document.getElementById('contentFrame').onload = function () {
-            // This is where you can try to detect and cover ad elements dynamically
-            const overlay = document.getElementById('idOverlay');
-            const frame = document.getElementById('contentFrame');
+        async function loadFilterList(url) {
+            const response = await fetch(url);
+            return await response.text();
+        }
 
-            // Example: check for known ad dimensions or specific positions
-            const adDimensions = [
-                { top: 0, left: 0, width: '100%', height: '50px' }, // Example ad banner
-            ];
+        function applyFilters(filterList, iframeDocument) {
+            const filters = filterList.split('\n').filter(line => line && !line.startsWith('!'));
 
+            filters.forEach(filter => {
+                if (filter.startsWith('##')) {
+                    const cssSelector = filter.slice(2);
+                    const elements = iframeDocument.querySelectorAll(cssSelector);
+                    elements.forEach(element => element.style.display = 'none');
+                }
+                // Additional rules for other filter types can be implemented here
+            });
+        }
+
+        document.getElementById('contentFrame').onload = async function () {
+            const iframe = document.getElementById('contentFrame');
+            const iframeDocument = iframe.contentDocument || iframe.contentWindow.document;
+
+            // Load filter list (e.g., EasyList)
+            const filterListUrl = 'https://easylist.to/easylist/easylist.txt';
+            const filterList = await loadFilterList(filterListUrl);
+
+            // Apply filters to the iframe content
+            applyFilters(filterList, iframeDocument);
+
+            // Reapply filters periodically to handle dynamically loaded content
             setInterval(() => {
-                adDimensions.forEach(dim => {
-                    const adElement = document.createElement('div');
-                    adElement.style.position = 'absolute';
-                    adElement.style.top = dim.top;
-                    adElement.style.left = dim.left;
-                    adElement.style.width = dim.width;
-                    adElement.style.height = dim.height;
-                    adElement.style.background = 'white';
-                    adElement.style.zIndex = '1000';
-                    frame.contentWindow.document.body.appendChild(adElement);
-                });
-            }, 1000); // Check every second
+                applyFilters(filterList, iframeDocument);
+            }, 2000); // Adjust interval as needed
         };
     </script>
 </body>
